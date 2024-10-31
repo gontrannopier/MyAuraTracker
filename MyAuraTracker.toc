@@ -1,0 +1,7 @@
+## Interface: 11200
+## Title: MyAuraTracker
+## Author: gontrannopier https://github.com/gontrannopier
+## Version: 0.1
+## Notes: 
+MyAuraTracker.xml
+Core.lua
