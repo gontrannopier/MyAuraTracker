@@ -1,3 +1,126 @@
+DEFAULT_CHAT_FRAME:AddMessage("init.lua is loading")
+
+setfenv(1, MyAuraTracker)
+-- Namespace
+--local addonName
+--local core = {}
+--core.Config = {}
+
+
+--------------------------------------------------------
+-- Custom Slash Command
+--------------------------------------------------------
+
+core.commands = {
+    -- this is a function, you can use wrapper function, but better is to use function address directly
+    ["config"] = core.Config.Toggle,
+
+    -- this is a wrapper function
+    ["help"] = function()
+        print(" ")
+        core:Print("List of slash commands:")
+        core:Print("|cff00cc66/at config|r - shows config menu")
+        core:Print("|cff00cc66/at help|r - shows help info")
+        print(" ")
+    end,
+
+    ["example"] = {
+        ["test"] = function(value)
+            core:Print("My Value:", value)
+        end
+    }
+}
+
+function core:Print(...)
+    local message = ""
+
+    -- Iterate through `arg`, converting each item to a string and adding it to `message`
+    for i = 1, table.getn(arg) do
+        message = message .. tostring(arg[i]) .. " "
+    end
+
+    -- Trim the trailing space and print the message to the chat frame
+    message = string.match(message, "^(.-)%s*$")
+    --message:match("^(.-)%s*$")  -- Remove trailing space
+    DEFAULT_CHAT_FRAME:AddMessage(message)
+end
+
+function core:Print(...)
+    local hex = select(4, self.Config:GetThemeColor())
+    local prefix = string.format("|cff%s%s|r", string.upper(hex), "My Aura Tracker:")
+    local packedArgs = { prefix }
+
+    for i = 1, table.getn(arg) do
+        table.insert(packedArgs, tostring(arg[i]))
+    end
+
+    print(unpack(packedArgs))
+end
+
+local function HandleSlashCommands(str)
+    if (str.length == 0) then
+        -- User just entered "/at" with no additional args.
+        core.commands.help()
+        return
+    end
+
+    -- What we will iterate over using for loop (arguments).
+    local args = {}
+    for _, arg in pairs({ string.split(' ', str) }) do
+        -- if string length is greater than 0.
+        if (arg.length > 0) then
+            table.insert(args, arg)
+        end
+    end
+end
+
+function core:init(event, name)
+    -- self in case of calling from OnEvent from frame refers to that frame !!
+    if (name ~= "MyAuraTracker") then
+        return
+    end
+
+    -- to be able to use left and right arrows in the edit box
+    -- without rotating your character
+    for i = 1, NUM_CHAT_WINDOWS do
+        --todo something wrong with this indexing
+        --_G["ChatFrame" .. i .. "EditBox"]:SetAltArrowKeyMode(false)
+        local frame = getglobal("ChatFrame" .. i .. "EditBox")
+        if frame then
+            print("setting alt arrow key mode")
+            frame:SetAltArrowKeyMode(false)
+        else
+            --print("frame was not found")
+        end
+        --print(i)
+    end
+
+    --------------------------------------------------------
+    -- Register Slash Commands!
+    --------------------------------------------------------
+    -- new slash command for reloading UI
+    SLASH_RELOADUI1 = "/rl" -- for quicker reloading
+    SlashCmdList.RELOADUI = ReloadUI
+
+    -- new slash command for showing framestack tool
+    SLASH_FRAMESTK1 = "/fs"
+    SlashCmdList.FRAMESTK = function()
+        LoadAddon('Blizzard_DebugTools')
+        FrameStackTooltip_Toggle()
+    end
+
+    -- 1..X naming of AuraTracker are actually different ways to do this command
+    -- basically aliases
+    SLASH_AuraTracker1 = "/at"
+    SlashCmdList.AuraTracker = HandleSlashCommands;
+
+    core:Print("Welcome back", UnitName("player") .. "!")
+end
+
+local events = CreateFrame("Frame")
+events:RegisterEvent("ADDON_LOADED")
+events:SetScript("OnEvent", core.init)
+
 -- create generic frame
 --local myFrame = CreateFrame("Frame");
 
@@ -28,35 +151,12 @@
 --frame:hide
 
 
-DEFAULT_CHAT_FRAME:AddMessage("helllooo")
+print("helllooo")
 
 local _G = getglobal
 
-SLASH_RELOAD_U1 = "/rl" -- for quicker reloading
 
-SlashCmdList.RELOADUI = ReloadUI
 
--- for quicker access to frame stack
-SLASH_FRAMESTK1 = "/fs"
-SlashCmdList.FRAMESTK = function()
-    LoadAddon('Blizzard_DebugTools')
-    FrameStackTooltip_Toggle()
-end
-
--- to be able to use left and right arrows in the edit box
--- without rotating your character
-for i = 1, NUM_CHAT_WINDOWS do
-    --todo something wrong with this indexing
-    --_G["ChatFrame" .. i .. "EditBox"]:SetAltArrowKeyMode(false)
-    local frame = getglobal("ChatFrame" .. i .. "EditBox")
-    if frame then
-        DEFAULT_CHAT_FRAME:AddMessage("setting alt arrow key mode")
-        frame:SetAltArrowKeyMode(false)
-    else
-        --DEFAULT_CHAT_FRAME:AddMessage("frame was not found")
-    end
-    --DEFAULT_CHAT_FRAME:AddMessage(i)
-end
 ---------------------------------------------------------------
 
 local UIConfig = CreateFrame("Frame", "MyAuraTracker", UIParent)
@@ -80,8 +180,10 @@ UIConfig:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 --from chat gpt in order to show a frame
 UIConfig:SetBackdrop({
     bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background", -- Background texture
-    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border", -- Border texture
-    tile = true, tileSize = 32, edgeSize = 32,
+    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",   -- Border texture
+    tile = true,
+    tileSize = 32,
+    edgeSize = 32,
     insets = { left = 11, right = 12, top = 12, bottom = 11 }
 })
 
@@ -112,23 +214,24 @@ UIConfig:SetBackdropColor(0, 0, 0, 1)
     "BOTTOMLEFT"
     "BOTTOM"
     "BOTTOMRIGHT"
-]]--
+]] --
 
 -- chat gpt stop
 
 -- Title background (using a separate frame as a workaround)
 local titleBg = CreateFrame("Frame", nil, UIConfig)
-titleBg:SetWidth(280)  -- Slightly smaller width than main frame
-titleBg:SetHeight(20)  -- Height for the title background
-titleBg:SetPoint("TOP", UIConfig, "TOP", 0, -10)  -- Position at the top of the main frame
+titleBg:SetWidth(280)                            -- Slightly smaller width than main frame
+titleBg:SetHeight(20)                            -- Height for the title background
+titleBg:SetPoint("TOP", UIConfig, "TOP", 0, -10) -- Position at the top of the main frame
 
 -- Add backdrop to the title background
 titleBg:SetBackdrop({
     bgFile = "Interface\\Tooltips\\UI-Tooltip-Foreground",
     edgeFile = nil,
-    tile = true, tileSize = 16
+    tile = true,
+    tileSize = 16
 })
-titleBg:SetBackdropColor(0.1, 0.1, 0.1, 0.8)  -- Dark background with slight transparency
+titleBg:SetBackdropColor(0.1, 0.1, 0.1, 0.8) -- Dark background with slight transparency
 
 UIConfig.title = UIConfig:CreateFontString(nil, "OVERLAY")
 
@@ -142,7 +245,7 @@ UIConfig.title:SetText("A My Addon")
 local successful = UIConfig.title:SetFont("Fonts\\FRIZQT__.ttf", 11, "OUTLINE, THICKOUTLINE, MONOCHROME")
 
 if (not successful) then
-    DEFAULT_CHAT_FRAME:AddMessage("SetFont failed")
+    print("SetFont failed")
 end
 
 -- add 3 buttons !
@@ -196,10 +299,10 @@ UIConfig.slider1:SetValue(50)
 UIConfig.slider1:SetScript("OnValueChanged", function(self, value)
     -- Check if self is not nil
     if self then
-        local step = self:GetValueStep()  -- Get the step size
+        local step = self:GetValueStep() -- Get the step size
         -- Round to the nearest step
         local roundedValue = math.floor((value + step / 2) / step) * step
-        self:SetValue(roundedValue)  -- Set the slider to the adjusted value
+        self:SetValue(roundedValue) -- Set the slider to the adjusted value
     end
 end)
 
@@ -217,10 +320,10 @@ UIConfig.slider2:SetValueStep(1)
 UIConfig.slider2:SetScript("OnValueChanged", function(self, value)
     -- Check if self is not nil
     if self then
-        local step = self:GetValueStep()  -- Get the step size
+        local step = self:GetValueStep() -- Get the step size
         -- Round to the nearest step
         local roundedValue = math.floor((value + step / 2) / step) * step
-        self:SetValue(roundedValue)  -- Set the slider to the adjusted value
+        self:SetValue(roundedValue) -- Set the slider to the adjusted value
     end
 end)
 
@@ -236,8 +339,8 @@ UIConfig.checkButton1:SetPoint("TOPLEFT", UIConfig.slider2, "BOTTOMLEFT", -10, -
 -- Create a font string to hold the text
 -- we have to create text for check button manually (1.12 thing)
 UIConfig.checkButton1.text = UIConfig.checkButton1:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-UIConfig.checkButton1.text:SetPoint("LEFT", UIConfig.checkButton1, "RIGHT", 5, 0)  -- Position the text to the right of the checkbox
-UIConfig.checkButton1.text:SetText("My Check Button 1!")  -- Set the text for the checkbox
+UIConfig.checkButton1.text:SetPoint("LEFT", UIConfig.checkButton1, "RIGHT", 5, 0) -- Position the text to the right of the checkbox
+UIConfig.checkButton1.text:SetText("My Check Button 1!")                          -- Set the text for the checkbox
 
 
 -- Check button 2
@@ -250,8 +353,8 @@ UIConfig.checkButton2:SetPoint("TOPLEFT", UIConfig.checkButton1, "BOTTOMLEFT", 0
 -- Create a font string to hold the text
 -- we have to create text for check button manually (1.12 thing)
 UIConfig.checkButton2.text = UIConfig.checkButton2:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-UIConfig.checkButton2.text:SetPoint("LEFT", UIConfig.checkButton2, "RIGHT", 5, 0)  -- Position the text to the right of the checkbox
-UIConfig.checkButton2.text:SetText("My Check Button 2!")  -- Set the text for the checkbox
+UIConfig.checkButton2.text:SetPoint("LEFT", UIConfig.checkButton2, "RIGHT", 5, 0) -- Position the text to the right of the checkbox
+UIConfig.checkButton2.text:SetText("My Check Button 2!")                          -- Set the text for the checkbox
 UIConfig.checkButton2:SetChecked(true)
 
 
@@ -260,3 +363,5 @@ UIConfig.checkButton2:SetChecked(true)
 -- you can add things on addon namespace in order to share variables
 -- between files
 -- => if you have multiple lua files, they own SHARED namespace
+
+-- config and timer .lua files will just store object and functions that we will use

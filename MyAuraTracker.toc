@@ -2,6 +2,6 @@
 ## Title: MyAuraTracker
 ## Author: gontrannopier https://github.com/gontrannopier
 ## Version: 0.1
-## Notes: 
+## Notes: the files are going to be loaded one after the other
+
 MyAuraTracker.xml
-Core.lua
