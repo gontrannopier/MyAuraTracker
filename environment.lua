@@ -20,3 +20,14 @@ DEFAULT_CHAT_FRAME:AddMessage("env.lua is loading")
 local _G = getfenv(0)
 MyAuraTracker = setmetatable({ _G = _G }, { __index = _G })
 DEFAULT_CHAT_FRAME:AddMessage("MyAuraTracker table loaded: ", MyAuraTracker)
+
+setfenv(1, MyAuraTracker)
+
+--------------------------------------------------------
+-- Namespaces
+--------------------------------------------------------
+-- _ is name for dummy variable, otherwise it would be used as addon name
+-- second name - core is name of namespace, it's shared between lua files
+--_
+core = {}
+core.Config = {}

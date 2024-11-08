@@ -1,21 +1,9 @@
-<!--<Ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.blizzard.com/wow/ui/"-->
-<!--    xsi:schemaLocation="http://www.blizzard.com/wow/ui/">-->
-<!--    <Script file="Core.lua"/>-->
-<!--    <Frame name="UIConfig" toplevel="true" parent="UIParent" hidden="false">-->
-<!--        <Scripts>-->
-<!--            <OnLoad>-->
-<!--                &lt;!&ndash;				B_AST_OnLoad()&ndash;&gt;-->
-<!--            </OnLoad>-->
-<!--            <OnEvent>-->
-<!--                &lt;!&ndash;				B_AST_OnEvent()&ndash;&gt;-->
-<!--            </OnEvent>-->
-<!--        </Scripts>-->
-<!--    </Frame>-->
-<!--</Ui>-->
-<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
-    <Include file="environment.lua"/>
-    <Include file="config.lua"/>
-    <Include file="functions.lua"/>
-    <Include file="init.lua"/>
-    <Include file="timer.lua"/>
+<Ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.blizzard.com/wow/ui/"
+    xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+    <Script file="environment.lua"/>
+    <Script file="config.lua"/>
+    <Script file="functions.lua"/>
+    <Script file="init.lua"/>
+    <Script file="timer.lua"/>
 </Ui>

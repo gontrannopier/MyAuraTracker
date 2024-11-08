@@ -6,9 +6,9 @@ setfenv(1, MyAuraTracker)
 --------------------------------------------------------
 -- _ is name for dummy variable, otherwise it would be used as addon name
 -- second name - core is name of namespace, it's shared between lua files
-local _
-core = {}
-core.Config = {}
+--local _
+--core = {}
+--core.Config = {}
 
 local Config = core.Config
 

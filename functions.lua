@@ -1,16 +1,6 @@
 setfenv(1, MyAuraTracker)
 
 DEFAULT_CHAT_FRAME:AddMessage("functions.lua is loading")
---local functions = {}
---
----- Emulate string.match using string.find
---function functions:string_match(str, pattern)
---    local startPos, endPos = string.find(str, pattern)
---    if startPos then
---        return string.sub(str, startPos, endPos) -- Extracts the matched substring
---    end
---    return nil
---end
 
 if not string.match then
     local function getargs(s, e, ...)
