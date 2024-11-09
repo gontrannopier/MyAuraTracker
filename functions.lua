@@ -11,22 +11,6 @@ if not string.match then
     end
 end
 
-if not print then
-    function print(...)
-        local message = ""
-
-        -- Iterate through `arg`, converting each item to a string and adding it to `message`
-        for i = 1, table.getn(arg) do
-            message = message .. tostring(arg[i]) .. " "
-        end
-
-        -- Trim the trailing space and print the message to the chat frame
-        message = string.match(message, "^(.-)%s*$")
-        --message:match("^(.-)%s*$")  -- Remove trailing space
-        DEFAULT_CHAT_FRAME:AddMessage(message)
-    end
-end
-
 if not select then
     function select(index, ...)
         if index == "#" then

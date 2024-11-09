@@ -30,4 +30,6 @@ setfenv(1, MyAuraTracker)
 -- second name - core is name of namespace, it's shared between lua files
 --_
 core = {}
+DEFAULT_CHAT_FRAME:AddMessage("LibStub: ", LibStub)
+core.Addon = LibStub("AceAddon-3.0"):NewAddon("MyAuraTracker", "AceConsole-3.0")
 core.Config = {}

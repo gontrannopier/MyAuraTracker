@@ -13,10 +13,11 @@ core.commands = {
 
     -- this is a wrapper function
     ["help"] = function()
+        --print("calling help function")
         print(" ")
-        core:Print("List of slash commands:")
-        core:Print("|cff00cc66/at config|r - shows config menu")
-        core:Print("|cff00cc66/at help|r - shows help info")
+        core:PrintWithPrefix("List of slash commands:")
+        core:PrintWithPrefix("|cff00cc66/at config|r - shows config menu")
+        core:PrintWithPrefix("|cff00cc66/at help|r - shows help info")
         print(" ")
     end,
 
@@ -29,33 +30,51 @@ core.commands = {
 
 function core:Print(...)
     local message = ""
-
+    --print("calling print")
     -- Iterate through `arg`, converting each item to a string and adding it to `message`
-    for i = 1, table.getn(arg) do
-        message = message .. tostring(arg[i]) .. " "
+    for i = 1, arg.n do
+        message = message .. (i >= 1 and " " or "") .. tostring(arg[i])
+        --print("current message " .. message)
     end
 
     -- Trim the trailing space and print the message to the chat frame
-    message = string.match(message, "^(.-)%s*$")
+    -- trim both start and end spaces
+    message = string.match(message, "^%s*(.-)%s*$")
     --message:match("^(.-)%s*$")  -- Remove trailing space
-    DEFAULT_CHAT_FRAME:AddMessage(message)
+    print(message)
 end
 
-function core:Print(...)
+function core:PrintWithPrefix(...)
     local hex = select(4, self.Config:GetThemeColor())
     local prefix = string.format("|cff%s%s|r", string.upper(hex), "My Aura Tracker:")
     local packedArgs = { prefix }
 
-    for i = 1, table.getn(arg) do
-        table.insert(packedArgs, tostring(arg[i]))
-    end
+    --for i = 1, table.getn(arg) do
+    --    table.insert(packedArgs, tostring(arg[i]))
+    --end
+    --print("print prefix " .. prefix)
 
-    print(unpack(packedArgs))
+    for i = 1, arg.n do
+        --n = n + 1
+        local stringArg = tostring(arg[i])
+        --print("collecting args " .. i .. stringArg)
+
+        table.insert(packedArgs, tostring(arg[i]))
+        --tmp[n] = tostring(select(i, ...))
+    end
+    --frame:AddMessage(tconcat(tmp, " ", 1, n))
+
+    --print("count of args " .. arg.n)
+    --print("first of packed args " .. packedArgs[1])
+    --print("second of packed args " .. packedArgs[2])
+    --print("third of packed args " .. packedArgs[3])
+
+    self:Print(unpack(packedArgs))
 end
 
 local function HandleSlashCommands(str)
     print("calling HandleSlashCommands")
-    if (str.length == 0) then
+    if (not str or string.len(str) == 0) then
         -- User just entered "/at" with no additional args.
         core.commands.help()
         return
@@ -123,31 +142,42 @@ function core:init(event, name)
     -- Register Slash Commands!
     --------------------------------------------------------
     -- new slash command for reloading UI
+
+    -- HINT FROM TURTLE WOW DISCORD
+    -- use /run DEFAULT_CHAT_FRAME:AddMessage(SLASH_MyAddon1 or "nil")
+    -- to check whether your slash command is defined.
+    -- if it's not defined,
+    -- use /run DEFAULT_CHAT_FRAME:AddMessage(SlashCmdList["MyAddon"] and "defined" or "nil").
+    -- both undefined: your code is not being run
+    -- if only SlashCmdList["MyAddon"] is defined it means you're not
+    -- setting SLASH_MyAddon1 in global scope,
+    -- use setglobal("SLASH_MyAddon1", function() DEFAULT_CHAT_FRAME:AddMessage("Command received") end)
+
     --SLASH_RELOADUI1 = "/rl" -- for quicker reloading
     --SlashCmdList.RELOADUI = ReloadUI
 
     -- new slash command for showing framestack tool
+    -- WARNING: THESE tools do not exist in 1.12 version of wow
     --SLASH_FRAMESTK1 = "/fs"
     --SlashCmdList.FRAMESTK = function()
     --    LoadAddon('Blizzard_DebugTools')
     --    FrameStackTooltip_Toggle()
     --end
+    --self.Addon:RegisterChatCommand("fs", function()
+    --    LoadAddon("Blizzard_DebugTools")
+    --    FrameStackTooltip_Toggle()
+    --end)
 
     -- 1..X naming of AuraTracker are actually different ways to do this command
     -- basically aliases
     --SLASH_AuraTracker1 = "/at"
     --SlashCmdList.AuraTracker = HandleSlashCommands;
-    print("SLASH command init start")
-    SLASH_MYADDON1 = "/myaddon"
-    SlashCmdList["MYADDON"] = function() DEFAULT_CHAT_FRAME:AddMessage("Command received") end
-    print("SLASH command init finished")
+    --print("SLASH command init start")
+    self.Addon:RegisterChatCommand("at", HandleSlashCommands)
 
-    --SlashCmdList.WIM = function()
-    --    DEFAULT_CHAT_FRAME:AddMessage("WIM command")
-    --end
-    --SLASH_WIM1 = "/wim";
+    --print("SLASH command init finished")
 
-    core:Print("Welcome back", UnitName("player") .. "!")
+    core:PrintWithPrefix("Welcome back", UnitName("player") .. "!")
 end
 
 local events = CreateFrame("Frame", "MyAddonEventsFrame")
@@ -155,11 +185,6 @@ events:RegisterEvent("ADDON_LOADED")
 events:SetScript("OnEvent", function()
     -- event is accessible like event, arg1 is name
     local name = arg1
-
-    SLASH_DPSMatek1 = "/dps1"
-    SlashCmdList["DPSMatek"] = function(msg)
-        core:Print("Welcome back XDDDDDD!!!!", UnitName("player") .. "!")
-    end
 
     core:init(event, arg1)
 end)
