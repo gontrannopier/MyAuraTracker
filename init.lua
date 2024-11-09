@@ -82,16 +82,16 @@ local function HandleSlashCommands(str)
 
     -- What we will iterate over using for loop (arguments).
     local args = {}
-    for _, arg in pairs({ string.split(' ', str) }) do
+    for _, arg in pairs({ strsplit(" ", str) }) do
         -- if string length is greater than 0.
-        if (arg.length > 0) then
+        if (string.len(arg) > 0) then
             table.insert(args, arg)
         end
     end
 
-    local path = core.commands;  -- required for updating found table.
+    local path = core.commands;       -- required for updating found table.
     for id, arg in pairs(args) do
-        if (arg.length > 0) then -- if string length is greater than 0.
+        if (string.len(arg) > 0) then -- if string length is greater than 0.
             arg = string.lower(arg);
             if (path[arg]) then
                 if (type(path[arg]) == "function") then

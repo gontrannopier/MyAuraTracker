@@ -18,6 +18,7 @@ and this Environment file must be loaded before all others
 DEFAULT_CHAT_FRAME:AddMessage("env.lua is loading")
 
 local _G = getfenv(0)
+-- sets inside of MyAuraTracker environment _G from local _G above
 MyAuraTracker = setmetatable({ _G = _G }, { __index = _G })
 DEFAULT_CHAT_FRAME:AddMessage("MyAuraTracker table loaded: ", MyAuraTracker)
 

@@ -11,6 +11,7 @@ setfenv(1, MyAuraTracker)
 --core.Config = {}
 
 local Config = core.Config
+local UIConfig
 
 --------------------------------------------------------
 -- Defaults (usually a database!)
@@ -28,8 +29,10 @@ local defaults = {
 -- Config functions
 --------------------------------------------------------
 function Config:Toggle()
-    local menu = UIConfig or Config:CreateMenu()
-    menu:SetShown(not menu:IsShown())
+    if (not UIConfig) then
+        UIConfig = Config:CreateMenu()
+    end
+    UIConfig:SetShown(not UIConfig:IsShown())
 end
 
 function Config:GetThemeColor()
@@ -37,12 +40,11 @@ function Config:GetThemeColor()
     return c.r, c.g, c.b, c.hex;
 end
 
-function Config:CreateButton(point, relativeFrame, relativePoint, yOffset, text)
-    local button = CreateFrame("Button", nil, UIConfig, "GameMenuButtonTemplate")
+function Config:CreateButton(parentFrame, point, relativeFrame, relativePoint, yOffset, text)
+    local button = CreateFrame("Button", nil, parentFrame, "GameMenuButtonTemplate")
     button:SetPoint(point, relativeFrame, relativePoint, 0, yOffset)
-    button:SetHeight(40)
-    button:SetWidth(text)
-    button:SetText("Save")
+    button:SetSize(140, 40)
+    button:SetText(text)
     button:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
     button:SetHighlightFontObject("GameFontNormalLarge")
 
@@ -53,19 +55,19 @@ function Config:CreateButton(point, relativeFrame, relativePoint, yOffset, text)
     return button
 end
 
-function Config:CreateSlider(point, relativeFrame, relativePoint, yOffset, value, valueStep)
-    local slider = CreateFrame("Slider", nil, UIConfig, "OptionsSliderTemplate")
-    UIConfig.slider1:SetPoint(point, relativeFrame, relativePoint, 0, yOffset)
-    UIConfig.slider1:SetMinMaxValues(1, 100)
-    UIConfig.slider1:SetValueStep(valueStep)
-    UIConfig.slider1:SetValue(value)
+function Config:CreateSlider(parentFrame, point, relativeFrame, relativePoint, yOffset, value, valueStep)
+    local slider = CreateFrame("Slider", nil, parentFrame, "OptionsSliderTemplate")
+    slider:SetPoint(point, relativeFrame, relativePoint, 0, yOffset)
+    slider:SetMinMaxValues(1, 100)
+    slider:SetValueStep(valueStep)
+    slider:SetValue(value)
     --UIConfig.slider1:SetOrientation("VERTICAL")
 
     -- this doesnt exists in 1.12
     --UIConfig.slider1:SetObeyStepOnDrag(true)
     -- using this instead
     -- Adjust the slider to obey steps during drag
-    UIConfig.slider1:SetScript("OnValueChanged", function(self, newValue)
+    slider:SetScript("OnValueChanged", function(self, newValue)
         -- Check if self is not nil
         if (self) then
             local step = self:GetValueStep() -- Get the step size
@@ -170,19 +172,19 @@ function Config:CreateMenu()
     -- add 3 buttons !
 
     -- save button
-    UIConfig.saveButton = self:CreateButton("CENTER", UIConfig, "TOP", -70, "Save")
+    UIConfig.saveButton = self:CreateButton(UIConfig, "CENTER", UIConfig, "TOP", -70, "Save")
     -- reset button
-    UIConfig.resetButton = self:CreateButton("TOP", UIConfig.saveButton, "BOTTOM", -10, "Reset")
+    UIConfig.resetButton = self:CreateButton(UIConfig, "TOP", UIConfig.saveButton, "BOTTOM", -10, "Reset")
     -- load button
-    UIConfig.loadButton = self:CreateButton("TOP", UIConfig.resetButton, "BOTTOM", -10, "Save")
+    UIConfig.loadButton = self:CreateButton(UIConfig, "TOP", UIConfig.resetButton, "BOTTOM", -10, "Save")
 
 
     -- SLIDERS !
 
     -- Slider 1
-    UIConfig.slider1 = self:CreateSlider("TOP", UIConfig.loadButton, "BOTTOM", -20, 50, 30)
+    UIConfig.slider1 = self:CreateSlider(UIConfig, "TOP", UIConfig.loadButton, "BOTTOM", -20, 50, 30)
     -- Slider 2
-    UIConfig.slider2 = self:CreateSlider("TOP", UIConfig.slider1, "BOTTOM", -20, 40, 1)
+    UIConfig.slider2 = self:CreateSlider(UIConfig, "TOP", UIConfig.slider1, "BOTTOM", -20, 40, 1)
 
     -- CHECK BUTTONS !!
 
@@ -214,6 +216,6 @@ function Config:CreateMenu()
     UIConfig.checkButton2.text:SetText("My Check Button 2!")                          -- Set the text for the checkbox
     UIConfig.checkButton2:SetChecked(true)
 
-    UIConfig:hide()
+    UIConfig:Hide()
     return UIConfig
 end
